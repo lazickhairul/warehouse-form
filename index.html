@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Warehouse Picking Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 480px;
+      margin: auto;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 12px;
+      display: block;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Warehouse Picking Log</h2>
+
+  <form id="pickForm">
+    <label for="staffName">Staff Name</label>
+    <input type="text" id="staffName" required />
+
+    <label for="product">Product</label>
+    <input type="text" id="product" readonly />
+
+    <label for="batch">Batch Number</label>
+    <input type="text" id="batch" readonly />
+
+    <label for="qty">Quantity Taken</label>
+    <input type="number" id="qty" required min="1" />
+
+    <label for="purpose">Purpose</label>
+    <select id="purpose">
+      <option value="Order Fulfillment">Order Fulfillment</option>
+      <option value="Sample">Sample</option>
+      <option value="Transfer">Transfer</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <button type="submit">Submit Log</button>
+  </form>
+
+  <div id="message"></div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const product = urlParams.get('product');
+    const batch = urlParams.get('batch');
+
+    document.getElementById('product').value = product || '';
+    document.getElementById('batch').value = batch || '';
+
+    const savedName = localStorage.getItem('staffName');
+    if (savedName) document.getElementById('staffName').value = savedName;
+
+    document.getElementById('pickForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const staffName = document.getElementById('staffName').value.trim();
+      const qty = document.getElementById('qty').value;
+      const purpose = document.getElementById('purpose').value;
+
+      if (!staffName || !qty) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      localStorage.setItem('staffName', staffName);
+
+      const response = await fetch('https://script.google.com/macros/s/AKfycbxKZinXNBPFgnyI2lSYY-O7kKmGyQcuvkBNakNzeRHljFKSmiD_l5dGaYXX2UzVFLM_/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          staffName,
+          product,
+          batch,
+          qty,
+          purpose
+        })
+      });
+
+      document.getElementById('message').textContent = '✅ Submitted successfully!';
+      document.getElementById('pickForm').reset();
+    });
+  </script>
+</body>
+</html>
