@@ -22,10 +22,20 @@
       margin-top: 5px;
       margin-bottom: 15px;
     }
+    #warning {
+      background: #ffdddd;
+      color: red;
+      padding: 10px;
+      margin-bottom: 15px;
+      display: none;
+      border: 1px solid red;
+    }
   </style>
 </head>
 <body>
   <h2>Warehouse Picking Log</h2>
+
+  <div id="warning">⚠️ This batch is marked as out of stock. Please check with supervisor.</div>
 
   <form id="pickForm">
     <label for="staffName">Staff Name</label>
@@ -37,14 +47,19 @@
     <label for="batch">Batch Number</label>
     <input type="text" id="batch" readonly />
 
-    <label for="qty">Quantity Taken</label>
-    <input type="number" id="qty" required min="1" />
+    <label for="boxes">Quantity Taken (Boxes)</label>
+    <input type="number" id="boxes" min="0" value="0" required />
 
-    <label for="purpose">Purpose</label>
-    <select id="purpose">
+    <label for="bottles">Quantity Taken (Bottles)</label>
+    <input type="number" id="bottles" min="0" value="0" required />
+
+    <label for="purpose">Purpose <span style="color:red">*</span></label>
+    <select id="purpose" required>
+      <option value="">-- Select Purpose --</option>
       <option value="Order Fulfillment">Order Fulfillment</option>
       <option value="Sample">Sample</option>
       <option value="Transfer">Transfer</option>
+      <option value="Repack">Repack</option>
       <option value="Other">Other</option>
     </select>
 
@@ -64,21 +79,32 @@
     const savedName = localStorage.getItem('staffName');
     if (savedName) document.getElementById('staffName').value = savedName;
 
+    async function checkStock(batch) {
+      // Placeholder logic: hardcoded out-of-stock batches
+      const outOfStockBatches = ['DNR 003Z25', 'LB 001X25'];
+      if (outOfStockBatches.includes(batch)) {
+        document.getElementById('warning').style.display = 'block';
+      }
+    }
+
+    checkStock(batch);
+
     document.getElementById('pickForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const staffName = document.getElementById('staffName').value.trim();
-      const qty = document.getElementById('qty').value;
+      const boxes = document.getElementById('boxes').value;
+      const bottles = document.getElementById('bottles').value;
       const purpose = document.getElementById('purpose').value;
 
-      if (!staffName || !qty) {
-        alert('Please fill in all fields');
+      if (!staffName || purpose === '') {
+        alert('Please fill in all required fields');
         return;
       }
 
       localStorage.setItem('staffName', staffName);
 
-      const response = await fetch('https://script.google.com/macros/s/AKfycbxKZinXNBPFgnyI2lSYY-O7kKmGyQcuvkBNakNzeRHljFKSmiD_l5dGaYXX2UzVFLM_/exec', {
+      const response = await fetch('https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_ID/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
@@ -86,7 +112,8 @@
           staffName,
           product,
           batch,
-          qty,
+          boxes,
+          bottles,
           purpose
         })
       });
