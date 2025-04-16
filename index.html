@@ -89,11 +89,14 @@
     const savedName = localStorage.getItem('staffName');
     if (savedName) document.getElementById('staffName').value = savedName;
 
+    let isOutOfStock = false;
+
     async function checkOutOfStock(batch) {
       try {
-        const res = await fetch('https://script.google.com/macros/s/AKfycbxlWfCM2rNtOwbPnweMeTOlaKeDaePzhRPsPkCbHFbmv6o_4dwToCbBWWdDPML4Utl0/exec?check=' + encodeURIComponent(batch));
+        const res = await fetch('https://script.google.com/macros/s/AKfycbxYe_xQNYJSILuXRe1OmmZEEAMdCbCmRzUfWJP8xzlqMqtrIod5H07GuNxSmWTDDCwj/exec?check=' + encodeURIComponent(batch));
         const result = await res.json();
         if (result.outOfStock === true) {
+          isOutOfStock = true;
           document.getElementById('warning').style.display = 'block';
         }
       } catch (err) {
@@ -105,6 +108,11 @@
 
     document.getElementById('pickForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      if (isOutOfStock) {
+        alert('❌ Cannot proceed. This batch is marked as out of stock.');
+        return;
+      }
 
       const staffName = document.getElementById('staffName').value.trim();
       const boxes = parseInt(document.getElementById('boxes').value) || 0;
