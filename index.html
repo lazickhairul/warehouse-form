@@ -26,6 +26,13 @@
       margin-top: 10px;
       font-weight: bold;
     }
+    #warning {
+      color: red;
+      background-color: #ffe5e5;
+      padding: 10px;
+      margin-bottom: 15px;
+      display: none;
+    }
     pre {
       font-size: 12px;
       background: #f0f0f0;
@@ -36,6 +43,8 @@
 </head>
 <body>
   <h2>Warehouse Picking Log</h2>
+
+  <div id="warning">⚠️ Warning: This batch is marked as out of stock!</div>
 
   <form id="pickForm">
     <label for="staffName">Staff Name</label>
@@ -80,6 +89,20 @@
     const savedName = localStorage.getItem('staffName');
     if (savedName) document.getElementById('staffName').value = savedName;
 
+    async function checkOutOfStock(batch) {
+      try {
+        const res = await fetch('https://script.google.com/macros/s/AKfycbxKZinXNBPFgnyI2lSYY-O7kKmGyQcuvkBNakNzeRHljFKSmiD_l5dGaYXX2UzVFLM_/exec?check=' + encodeURIComponent(batch));
+        const result = await res.json();
+        if (result.outOfStock === true) {
+          document.getElementById('warning').style.display = 'block';
+        }
+      } catch (err) {
+        console.error('Failed to check stock:', err);
+      }
+    }
+
+    if (batch) checkOutOfStock(batch);
+
     document.getElementById('pickForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -106,7 +129,7 @@
 
       document.getElementById('debug').textContent = 'Sending: ' + JSON.stringify(payload, null, 2);
 
-      await fetch('https://script.google.com/macros/s/AKfycbxYe_xQNYJSILuXRe1OmmZEEAMdCbCmRzUfWJP8xzlqMqtrIod5H07GuNxSmWTDDCwj/exec', {
+      await fetch('https://script.google.com/macros/s/AKfycbxKZinXNBPFgnyI2lSYY-O7kKmGyQcuvkBNakNzeRHljFKSmiD_l5dGaYXX2UzVFLM_/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
