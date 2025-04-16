@@ -93,7 +93,7 @@
 
     async function checkOutOfStock(batch) {
       try {
-        const res = await fetch('https://script.google.com/macros/s/AKfycbxYe_xQNYJSILuXRe1OmmZEEAMdCbCmRzUfWJP8xzlqMqtrIod5H07GuNxSmWTDDCwj/exec?check=' + encodeURIComponent(batch));
+        const res = await fetch('https://script.google.com/macros/s/AKfycbwRx93ADQXeWsnDPB8EigrL47LQxLQBy_GeRuXM0WChsWJWwaf3ooq9Lu3UDTVnXV0Z/exec?check=' + encodeURIComponent(batch));
         const result = await res.json();
         if (result.outOfStock === true) {
           isOutOfStock = true;
