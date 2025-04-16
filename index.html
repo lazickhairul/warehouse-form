@@ -91,7 +91,7 @@
 
     async function checkOutOfStock(batch) {
       try {
-        const res = await fetch('https://script.google.com/macros/s/AKfycbxKZinXNBPFgnyI2lSYY-O7kKmGyQcuvkBNakNzeRHljFKSmiD_l5dGaYXX2UzVFLM_/exec?check=' + encodeURIComponent(batch));
+        const res = await fetch('https://script.google.com/macros/s/AKfycbxYe_xQNYJSILuXRe1OmmZEEAMdCbCmRzUfWJP8xzlqMqtrIod5H07GuNxSmWTDDCwj/exec?check=' + encodeURIComponent(batch));
         const result = await res.json();
         if (result.outOfStock === true) {
           document.getElementById('warning').style.display = 'block';
@@ -129,7 +129,7 @@
 
       document.getElementById('debug').textContent = 'Sending: ' + JSON.stringify(payload, null, 2);
 
-      await fetch('https://script.google.com/macros/s/AKfycbxKZinXNBPFgnyI2lSYY-O7kKmGyQcuvkBNakNzeRHljFKSmiD_l5dGaYXX2UzVFLM_/exec', {
+      await fetch('https://script.google.com/macros/s/AKfycbxYe_xQNYJSILuXRe1OmmZEEAMdCbCmRzUfWJP8xzlqMqtrIod5H07GuNxSmWTDDCwj/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
