@@ -90,14 +90,19 @@
     if (savedName) document.getElementById('staffName').value = savedName;
 
     let isOutOfStock = false;
+    let hasCheckedStock = false;
 
     async function checkOutOfStock(batch) {
       try {
         const res = await fetch('https://script.google.com/macros/s/AKfycbwRx93ADQXeWsnDPB8EigrL47LQxLQBy_GeRuXM0WChsWJWwaf3ooq9Lu3UDTVnXV0Z/exec?check=' + encodeURIComponent(batch));
         const result = await res.json();
+        hasCheckedStock = true;
         if (result.outOfStock === true) {
           isOutOfStock = true;
           document.getElementById('warning').style.display = 'block';
+        } else {
+          isOutOfStock = false;
+          document.getElementById('warning').style.display = 'none';
         }
       } catch (err) {
         console.error('Failed to check stock:', err);
@@ -108,6 +113,11 @@
 
     document.getElementById('pickForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      if (!hasCheckedStock) {
+        alert('Checking stock status. Please wait a moment and try again.');
+        return;
+      }
 
       if (isOutOfStock) {
         alert('❌ Cannot proceed. This batch is marked as out of stock.');
