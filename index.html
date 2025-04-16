@@ -79,84 +79,86 @@
   <pre id="debug"></pre>
 
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const product = urlParams.get('product');
-    const batch = urlParams.get('batch');
+    window.onload = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const product = urlParams.get('product');
+      const batch = urlParams.get('batch');
 
-    document.getElementById('product').value = product || '';
-    document.getElementById('batch').value = batch || '';
+      document.getElementById('product').value = product || '';
+      document.getElementById('batch').value = batch || '';
 
-    const savedName = localStorage.getItem('staffName');
-    if (savedName) document.getElementById('staffName').value = savedName;
+      const savedName = localStorage.getItem('staffName');
+      if (savedName) document.getElementById('staffName').value = savedName;
 
-    let isOutOfStock = false;
-    let hasCheckedStock = false;
+      let isOutOfStock = false;
+      let hasCheckedStock = false;
 
-    async function checkOutOfStock(batch) {
-      try {
-        const res = await fetch('https://script.google.com/macros/s/AKfycbwRx93ADQXeWsnDPB8EigrL47LQxLQBy_GeRuXM0WChsWJWwaf3ooq9Lu3UDTVnXV0Z/exec?check=' + encodeURIComponent(batch));
-        const result = await res.json();
-        hasCheckedStock = true;
-        if (result.outOfStock === true) {
-          isOutOfStock = true;
-          document.getElementById('warning').style.display = 'block';
-        } else {
-          isOutOfStock = false;
-          document.getElementById('warning').style.display = 'none';
+      async function checkOutOfStock(batch) {
+        try {
+          const res = await fetch('https://script.google.com/macros/s/AKfycbwRx93ADQXeWsnDPB8EigrL47LQxLQBy_GeRuXM0WChsWJWwaf3ooq9Lu3UDTVnXV0Z/exec?check=' + encodeURIComponent(batch));
+          const result = await res.json();
+          hasCheckedStock = true;
+          if (result.outOfStock === true) {
+            isOutOfStock = true;
+            document.getElementById('warning').style.display = 'block';
+          } else {
+            isOutOfStock = false;
+            document.getElementById('warning').style.display = 'none';
+          }
+        } catch (err) {
+          console.error('Failed to check stock:', err);
         }
-      } catch (err) {
-        console.error('Failed to check stock:', err);
-      }
-    }
-
-    if (batch) checkOutOfStock(batch);
-
-    document.getElementById('pickForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      if (!hasCheckedStock) {
-        alert('Checking stock status. Please wait a moment and try again.');
-        return;
       }
 
-      if (isOutOfStock) {
-        alert('❌ Cannot proceed. This batch is marked as out of stock.');
-        return;
-      }
+      if (batch) await checkOutOfStock(batch);
 
-      const staffName = document.getElementById('staffName').value.trim();
-      const boxes = parseInt(document.getElementById('boxes').value) || 0;
-      const bottles = parseInt(document.getElementById('bottles').value) || 0;
-      const purpose = document.getElementById('purpose').value;
+      document.getElementById('pickForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-      if (!staffName || purpose === '') {
-        alert('Please fill in all required fields');
-        return;
-      }
+        if (!hasCheckedStock) {
+          alert('Checking stock status. Please wait and try again.');
+          return;
+        }
 
-      localStorage.setItem('staffName', staffName);
+        if (isOutOfStock) {
+          alert('❌ Cannot proceed. This batch is marked as out of stock.');
+          return;
+        }
 
-      const payload = {
-        staffName,
-        product,
-        batch,
-        boxes,
-        bottles,
-        purpose
-      };
+        const staffName = document.getElementById('staffName').value.trim();
+        const boxes = parseInt(document.getElementById('boxes').value) || 0;
+        const bottles = parseInt(document.getElementById('bottles').value) || 0;
+        const purpose = document.getElementById('purpose').value;
 
-      document.getElementById('debug').textContent = 'Sending: ' + JSON.stringify(payload, null, 2);
+        if (!staffName || purpose === '') {
+          alert('Please fill in all required fields');
+          return;
+        }
 
-      await fetch('https://script.google.com/macros/s/AKfycbwRx93ADQXeWsnDPB8EigrL47LQxLQBy_GeRuXM0WChsWJWwaf3ooq9Lu3UDTVnXV0Z/exec', {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        localStorage.setItem('staffName', staffName);
+
+        const payload = {
+          staffName,
+          product,
+          batch,
+          boxes,
+          bottles,
+          purpose
+        };
+
+        document.getElementById('debug').textContent = 'Sending: ' + JSON.stringify(payload, null, 2);
+
+        await fetch('https://script.google.com/macros/s/AKfycbwRx93ADQXeWsnDPB8EigrL47LQxLQBy_GeRuXM0WChsWJWwaf3ooq9Lu3UDTVnXV0Z/exec', {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        document.getElementById('message').textContent = '✅ Submitted successfully!';
+        document.getElementById('pickForm').reset();
       });
-
-      document.getElementById('message').textContent = '✅ Submitted successfully!';
-      document.getElementById('pickForm').reset();
-    });
+    };
   </script>
 </body>
 </html>
